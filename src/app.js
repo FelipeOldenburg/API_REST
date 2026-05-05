@@ -9,6 +9,8 @@ app.use(express.json());
 
 app.use(require('./routes'));
 
+app.use(express.static('public'));
+
 app.use(express.json({ limit: '10kb' }));
 
 module.exports = app;

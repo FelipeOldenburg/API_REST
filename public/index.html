@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>API Eventos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🎉 Sistema de Eventos</h1>
+
+<div class="box">
+  <h2>Registro</h2>
+  <input id="name" placeholder="Nome">
+  <input id="email" placeholder="Email">
+  <input id="password" placeholder="Senha">
+  <button onclick="register()">Registrar</button>
+</div>
+
+<div class="box">
+  <h2>Login</h2>
+  <input id="emailLogin" placeholder="Email">
+  <input id="passwordLogin" placeholder="Senha">
+  <button onclick="login()">Login</button>
+</div>
+
+<div class="box">
+  <h2>Criar Evento</h2>
+  <input id="title" placeholder="Título">
+  <button onclick="createEvent()">Criar</button>
+</div>
+
+<div class="box">
+  <h2>Eventos</h2>
+  <button onclick="getEvents()">Listar</button>
+  <ul id="list"></ul>
+</div>
+
+<script>
+let token = localStorage.getItem("token") || "";
+
+async function register() {
+  await fetch('/register', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      name: name.value,
+      email: email.value,
+      password: password.value
+    })
+  });
+  alert("Registrado!");
+}
+
+async function login() {
+  const res = await fetch('/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      email: emailLogin.value,
+      password: passwordLogin.value
+    })
+  });
+
+  const data = await res.json();
+  token = data.token;
+  localStorage.setItem("token", token);
+  alert("Logado!");
+}
+
+async function createEvent() {
+  await fetch('/events', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token
+    },
+    body: JSON.stringify({
+      title: title.value
+    })
+  });
+  alert("Evento criado!");
+}
+
+async function getEvents() {
+  const res = await fetch('/events');
+  const data = await res.json();
+
+  list.innerHTML = "";
+  data.forEach(e => {
+    const li = document.createElement('li');
+    li.innerText = e.title;
+    list.appendChild(li);
+  });
+}
+</script>
+
+</body>
+</html>

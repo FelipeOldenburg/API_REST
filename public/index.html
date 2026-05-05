@@ -1,146 +1,177 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Eventos</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Eventos</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<canvas id="particles"></canvas>
+    <canvas id="particles"></canvas>
 
-<h1>🎉 Sistema de Eventos</h1>
+    <h1>🎉 Sistema de Eventos</h1>
 
-<div class="container">
+    <div class="container">
 
-  <div class="box">
-    <h2>Registro</h2>
-    <input id="name" placeholder="Nome">
-    <input id="email" placeholder="Email">
-    <input id="password" placeholder="Senha">
-    <button onclick="register()">Registrar</button>
-  </div>
+        <div class="box">
+            <h2>Registro</h2>
+            <input id="name" placeholder="Nome">
+            <input id="email" placeholder="Email">
+            <input id="password" placeholder="Senha">
+            <button onclick="register()">Registrar</button>
+        </div>
 
-  <div class="box">
-    <h2>Login</h2>
-    <input id="emailLogin" placeholder="Email">
-    <input id="passwordLogin" placeholder="Senha">
-    <button onclick="login()">Login</button>
-  </div>
+        <div class="box">
+            <h2>Login</h2>
+            <input id="emailLogin" placeholder="Email">
+            <input id="passwordLogin" placeholder="Senha">
+            <button onclick="login()">Login</button>
+        </div>
 
-  <div class="box">
-    <h2>Criar Evento</h2>
-    <input id="title" placeholder="Título">
-    <button onclick="createEvent()">Criar</button>
-  </div>
+        <div class="box">
+            <h2>Criar Evento</h2>
+            <input id="title" placeholder="Título">
+            <button onclick="createEventAPI()">Criar</button>
+        </div>
 
-  <div class="box">
-    <h2>Eventos</h2>
-    <button onclick="getEvents()">Listar</button>
-    <ul id="list"></ul>
-  </div>
+        <div class="box">
+            <h2>Eventos</h2>
+            <button onclick="getEvents()">Listar</button>
+            <ul id="list"></ul>
+        </div>
 
-</div>
+    </div>
 
-<script>
-let token = localStorage.getItem("token") || "";
+    <script>
+        let token = localStorage.getItem("token") || "";
 
-// -------- API --------
-async function register() {
-  await fetch('/register', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      name: name.value,
-      email: email.value,
-      password: password.value
-    })
-  });
-  alert("Registrado!");
-}
+        // -------- API --------
+        async function register() {
+            console.log(
+                document.getElementById("name").value,
+                document.getElementById("email").value,
+                document.getElementById("password").value
+            );
+            const res = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: document.getElementById("name").value,
+                    email: document.getElementById("email").value,
+                    password: document.getElementById("password").value
+                })
+            });
 
-async function login() {
-  const res = await fetch('/login', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      email: emailLogin.value,
-      password: passwordLogin.value
-    })
-  });
+            const data = await res.json();
 
-  const data = await res.json();
-  token = data.token;
-  localStorage.setItem("token", token);
-  alert("Logado!");
-}
+            if (!res.ok) {
+                console.log("Erro register:", data);
+                alert(data.error || "Erro ao registrar");
+                return;
+            }
 
-async function createEvent() {
-  await fetch('/events', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': token
-    },
-    body: JSON.stringify({
-      title: title.value
-    })
-  });
-  alert("Evento criado!");
-}
+            alert("Registrado com sucesso!");
+        }
 
-async function getEvents() {
-  const res = await fetch('/events');
-  const data = await res.json();
+        async function login() {
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: emailLogin.value,
+                    password: passwordLogin.value
+                })
+            });
 
-  list.innerHTML = "";
-  data.forEach(e => {
-    const li = document.createElement('li');
-    li.innerText = e.title;
-    list.appendChild(li);
-  });
-}
+            const data = await res.json();
 
-// -------- PARTICULAS --------
-const canvas = document.getElementById("particles");
-const ctx = canvas.getContext("2d");
+            // 👇 VERIFICA SE DEU ERRO
+            if (!res.ok) {
+                console.log("Erro:", data);
+                alert(data.error || "Erro no login");
+                return;
+            }
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+            token = data.token;
 
-let particles = [];
+            console.log("TOKEN:", token);
 
-for (let i = 0; i < 80; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 2,
-    dx: (Math.random() - 0.5),
-    dy: (Math.random() - 0.5)
-  });
-}
+            localStorage.setItem("token", token);
 
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+            alert("Logado!");
+        }
 
-  particles.forEach(p => {
-    p.x += p.dx;
-    p.y += p.dy;
+        async function createEventAPI() {
+            await fetch('/events', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    title: title.value
+                })
+            });
+            alert("Evento criado!");
+        }
 
-    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+        async function getEvents() {
+            const res = await fetch('/events');
+            const data = await res.json();
 
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = "#22c55e";
-    ctx.fill();
-  });
+            list.innerHTML = "";
+            data.forEach(e => {
+                const li = document.createElement('li');
+                li.innerText = e.title;
+                list.appendChild(li);
+            });
+        }
 
-  requestAnimationFrame(animate);
-}
+        // -------- PARTICULAS --------
+        const canvas = document.getElementById("particles");
+        const ctx = canvas.getContext("2d");
 
-animate();
-</script>
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+
+        for (let i = 0; i < 80; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 2,
+                dx: (Math.random() - 0.5),
+                dy: (Math.random() - 0.5)
+            });
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(p => {
+                p.x += p.dx;
+                p.y += p.dy;
+
+                if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = "#22c55e";
+                ctx.fill();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
 
 </body>
+
 </html>

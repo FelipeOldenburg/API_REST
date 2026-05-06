@@ -9,11 +9,14 @@
 
 <canvas id="particles"></canvas>
 
-<h1>🎉 Sistema de Eventos</h1>
+<header class="hero">
+  <h1>Gerencie seus eventos</h1>
+  <p>Crie, edite e organize tudo em um só lugar</p>
+</header>
 
 <div class="container">
 
-  <div class="box">
+  <div class="card">
     <h2>Registro</h2>
     <input id="name" placeholder="Nome">
     <input id="email" placeholder="Email">
@@ -21,84 +24,140 @@
     <button onclick="register()">Registrar</button>
   </div>
 
-  <div class="box">
+  <div class="card">
     <h2>Login</h2>
     <input id="emailLogin" placeholder="Email">
     <input id="passwordLogin" placeholder="Senha">
     <button onclick="login()">Login</button>
   </div>
 
-  <div class="box">
+  <div class="card">
     <h2>Criar Evento</h2>
     <input id="title" placeholder="Título">
-    <button onclick="createEvent()">Criar</button>
+    <button onclick="createEventAPI()">Criar</button>
   </div>
 
-  <div class="box">
-    <h2>Eventos</h2>
-    <button onclick="getEvents()">Listar</button>
-    <ul id="list"></ul>
-  </div>
+</div>
 
+<div class="events-section">
+  <h2>Seus Eventos</h2>
+  <button onclick="getEvents()">Atualizar</button>
+  <div id="list" class="event-list"></div>
 </div>
 
 <script>
 let token = localStorage.getItem("token") || "";
 
-// -------- API --------
+// -------- REGISTER --------
 async function register() {
-  await fetch('/register', {
+  const res = await fetch('/register', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
-      name: name.value,
-      email: email.value,
-      password: password.value
+      name: document.getElementById("name").value,
+      email: document.getElementById("email").value,
+      password: document.getElementById("password").value
     })
   });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error);
+    return;
+  }
+
   alert("Registrado!");
 }
 
+// -------- LOGIN --------
 async function login() {
   const res = await fetch('/login', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
-      email: emailLogin.value,
-      password: passwordLogin.value
+      email: document.getElementById("emailLogin").value,
+      password: document.getElementById("passwordLogin").value
     })
   });
 
   const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error);
+    return;
+  }
+
   token = data.token;
   localStorage.setItem("token", token);
+
   alert("Logado!");
 }
 
-async function createEvent() {
+// -------- CREATE --------
+async function createEventAPI() {
   await fetch('/events', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': token
+      'Authorization': 'Bearer ' + token
     },
     body: JSON.stringify({
-      title: title.value
+      title: document.getElementById("title").value
     })
   });
-  alert("Evento criado!");
+
+  getEvents();
 }
 
+// -------- LIST + EDIT + DELETE --------
 async function getEvents() {
   const res = await fetch('/events');
   const data = await res.json();
 
+  const list = document.getElementById("list");
   list.innerHTML = "";
+
   data.forEach(e => {
-    const li = document.createElement('li');
-    li.innerText = e.title;
-    list.appendChild(li);
+    const div = document.createElement("div");
+    div.className = "event-card";
+
+    div.innerHTML = `
+      <span>${e.title}</span>
+      <div>
+        <button onclick="editEvent('${e._id}', '${e.title}')">✏️</button>
+        <button onclick="deleteEvent('${e._id}')">🗑️</button>
+      </div>
+    `;
+
+    list.appendChild(div);
   });
+}
+
+// -------- DELETE --------
+async function deleteEvent(id) {
+  await fetch('/events/' + id, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': 'Bearer ' + token
+    }
+  });
+
+  getEvents();
+}
+
+// -------- EDIT --------
+function editEvent(id, oldTitle) {
+  const newTitle = prompt("Novo título:", oldTitle);
+
+  fetch('/events/' + id, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify({ title: newTitle })
+  }).then(() => getEvents());
 }
 
 // -------- PARTICULAS --------
@@ -132,7 +191,7 @@ function animate() {
 
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = "#22c55e";
+    ctx.fillStyle = "#4f46e5";
     ctx.fill();
   });
 

@@ -1,73 +1,45 @@
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: #020617;
+  font-family: 'Segoe UI';
+  background: radial-gradient(circle at center, #4f46e5, #020617);
   color: white;
-  overflow-x: hidden;
 }
 
-h1 {
+.hero {
   text-align: center;
-  margin-top: 20px;
-  z-index: 1;
-  position: relative;
-}
-
-#particles {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 0;
+  margin: 40px;
 }
 
 .container {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  z-index: 1;
-  position: relative;
+  flex-wrap: wrap;
 }
 
-.box {
-  backdrop-filter: blur(10px);
+.card {
   background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
   padding: 20px;
-  margin: 15px;
-  width: 280px;
-  border-radius: 15px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
-  transition: 0.3s;
+  margin: 10px;
+  border-radius: 12px;
+  width: 250px;
 }
 
-.box:hover {
-  transform: scale(1.05);
+.events-section {
+  text-align: center;
+  margin-top: 30px;
 }
 
-input {
-  width: 90%;
+.event-card {
+  background: rgba(255,255,255,0.08);
+  margin: 10px auto;
   padding: 10px;
-  margin: 10px 0;
+  width: 300px;
+  display: flex;
+  justify-content: space-between;
   border-radius: 8px;
-  border: none;
-  outline: none;
 }
 
 button {
-  width: 100%;
-  padding: 10px;
-  background: linear-gradient(45deg, #22c55e, #4ade80);
-  border: none;
-  color: black;
-  font-weight: bold;
   cursor: pointer;
-  border-radius: 8px;
-}
-
-button:hover {
-  opacity: 0.8;
-}
-
-ul {
-  text-align: left;
 }

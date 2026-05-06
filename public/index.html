@@ -125,8 +125,8 @@ async function getEvents() {
     div.innerHTML = `
       <span>${e.title}</span>
       <div>
-        <button onclick="editEvent('${e._id}', '${e.title}')">✏️</button>
-        <button onclick="deleteEvent('${e._id}')">🗑️</button>
+       <button class="edit-btn" onclick="editEvent('${e._id}', '${e.title}')">✏️</button>
+<button class="delete-btn" onclick="deleteEvent('${e._id}')">🗑️</button>
       </div>
     `;
 

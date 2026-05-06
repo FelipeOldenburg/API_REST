@@ -3,17 +3,37 @@ body {
   font-family: 'Segoe UI';
   background: radial-gradient(circle at center, #4f46e5, #020617);
   color: white;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 🔥 IMPORTANTE */
+#particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* 👇 CONTEÚDO NA FRENTE */
+.hero, .container, .events-section {
+  position: relative;
+  z-index: 1;
 }
 
 .hero {
   text-align: center;
-  margin: 40px;
+  margin-top: 60px;
 }
 
+/* 🔥 CENTRALIZA TUDO */
 .container {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+  margin-top: 20px;
 }
 
 .card {
@@ -23,11 +43,12 @@ body {
   margin: 10px;
   border-radius: 12px;
   width: 250px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
 }
 
 .events-section {
   text-align: center;
-  margin-top: 30px;
+  margin-top: 40px;
 }
 
 .event-card {

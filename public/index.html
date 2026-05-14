@@ -96,7 +96,7 @@ async function login() {
 
 // -------- CREATE --------
 async function createEventAPI() {
-  await fetch('/events', {
+  const res = await fetch('/events', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -107,12 +107,25 @@ async function createEventAPI() {
     })
   });
 
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error || 'Erro ao criar evento');
+    return;
+  }
+
+  alert('Evento criado!');
+  document.getElementById("title").value = "";
   getEvents();
 }
 
 // -------- LIST + EDIT + DELETE --------
 async function getEvents() {
-  const res = await fetch('/events');
+  const res = await fetch('/events', {
+    headers: {
+      'Authorization': 'Bearer ' + token
+    }
+  });
   const data = await res.json();
 
   const list = document.getElementById("list");

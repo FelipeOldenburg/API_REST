@@ -37,8 +37,8 @@ http://localhost:3000/register
 
 body:
 {
-  "name": "Felipe",
-  "email": "felipe@email.com",
+  "name": "KaliLinux",
+  "email": "Kali@email.com",
   "password": "123456"
 }
 
@@ -46,7 +46,7 @@ FAZER LOGIN-POST
 
 body:
 {
-  "email": "felipe@email.com",
+  "email": "kali@email.com",
   "password": "123456"
 }
 
@@ -61,7 +61,7 @@ http://localhost:3000/events COLOCAR O TOKEN CRIADO EM AUTHORIZATION
 
 body:
 {
-  "title": "Meu evento",
+  "title": "Hackear quem esta lendo",
   "description": "Evento de teste",
   "date": "2026-05-20"
 }
@@ -78,7 +78,7 @@ http://localhost:3000/events/ID_DO_EVENTO
 
 body:
 {
-  "title": "Evento atualizado",
+  "title": "Pessoa hackeada com sucesso",
   "description": "Descrição nova"
 }
 

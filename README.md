@@ -29,9 +29,67 @@ POST /events
 PUT /events/:id
 DELETE /events/:id
 
+exemplo:
+
+CRIAR USUARIO-POST
+
+http://localhost:3000/register
+
+body:
+{
+  "name": "KaliLinux",
+  "email": "Kali@email.com",
+  "password": "123456"
+}
+
+FAZER LOGIN-POST
+
+body:
+{
+  "email": "kali@email.com",
+  "password": "123456"
+}
+
+Gera um token
+{
+  "token": "..."
+}
+
+CRIAR EVENTO-POST
+
+http://localhost:3000/events COLOCAR O TOKEN CRIADO EM AUTHORIZATION
+
+body:
+{
+  "title": "Hackear quem esta lendo",
+  "description": "Evento de teste",
+  "date": "2026-05-20"
+}
+
+LISTAR EVENTOS-GET
+
+http://localhost:3000/events
+
+//TOKEN NO AUTHORIZATION
+
+EDITAR EVENTO-PUT
+
+http://localhost:3000/events/ID_DO_EVENTO
+
+body:
+{
+  "title": "Pessoa hackeada com sucesso",
+  "description": "Descrição nova"
+}
+
+DELETAR EVENTO-DELETE
+
+http://localhost:3000/events/ID_DO_EVENTO
+
+
 
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/SEU-USUARIO/api-eventos.git
+git clone https://github.com/FelipeOldenburg/API_REST.git
 cd api-evento

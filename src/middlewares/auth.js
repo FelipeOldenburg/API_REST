@@ -3,17 +3,13 @@ const jwt = require('jsonwebtoken');
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
-    return res.status(401).json({ error: "Sem token" });
-  }
+  if (!authHeader) return res.status(401).json({ error: "Sem token" });
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.replace('Bearer ', '');
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    req.userId = decoded.id;
-
+    req.user = { id: decoded.id };
     next();
   } catch {
     res.status(401).json({ error: "Token inválido" });

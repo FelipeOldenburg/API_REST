@@ -33,5 +33,5 @@ DELETE /events/:id
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/SEU-USUARIO/api-eventos.git
+git clone https://github.com/FelipeOldenburg/API_REST.git
 cd api-evento

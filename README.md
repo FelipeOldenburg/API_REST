@@ -31,31 +31,33 @@ DELETE /events/:id
 
 exemplo:
 
-CRIAR USUARIO-POST
+//CRIAR USUARIO-POST
 
 http://localhost:3000/register
 
 body:
 {
   "name": "KaliLinux",
-  "email": "Kali@email.com",
+  "email": "kali@gmail.com",
   "password": "123456"
 }
 
-FAZER LOGIN-POST
+//FAZER LOGIN-POST
+
+http://localhost:3000/login
 
 body:
 {
-  "email": "kali@email.com",
+  "email": "kali@gmail.com",
   "password": "123456"
 }
 
 Gera um token
 {
-  "token": "..."
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMDY4NjI4YTMzMWQxYjY0ZjEyM2ViMSIsImlhdCI6MTc3ODgxMjQ3OCwiZXhwIjoxNzc4ODk4ODc4fQ.X1twxpgBQ-c4jbjlgSDpcyuRSWlgM_mRL1teGit09Tg"
 }
 
-CRIAR EVENTO-POST
+//CRIAR EVENTO-POST
 
 http://localhost:3000/events COLOCAR O TOKEN CRIADO EM AUTHORIZATION
 
@@ -66,13 +68,13 @@ body:
   "date": "2026-05-20"
 }
 
-LISTAR EVENTOS-GET
+//LISTAR EVENTOS-GET
 
 http://localhost:3000/events
 
 //TOKEN NO AUTHORIZATION
 
-EDITAR EVENTO-PUT
+//EDITAR EVENTO-PUT
 
 http://localhost:3000/events/ID_DO_EVENTO
 
@@ -82,7 +84,7 @@ body:
   "description": "Descrição nova"
 }
 
-DELETAR EVENTO-DELETE
+//DELETAR EVENTO-DELETE
 
 http://localhost:3000/events/ID_DO_EVENTO
 

@@ -25,16 +25,54 @@ exports.getAll = async (req, res) => {
   }
 };
 
+exports.getById = async (req, res) => {
+  try {
+    const event = await Event.findOne({
+      _id: req.params.id,
+      createdBy: req.user.id
+    });
+
+    if (!event) {
+      return res.status(404).json({ error: "Evento nao encontrado" });
+    }
+
+    res.json(event);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 exports.update = async (req, res) => {
-  const event = await Event.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true }
-  );
-  res.json(event);
+  try {
+    const event = await Event.findOneAndUpdate(
+      { _id: req.params.id, createdBy: req.user.id },
+      req.body,
+      { new: true }
+    );
+
+    if (!event) {
+      return res.status(404).json({ error: "Evento nao encontrado" });
+    }
+
+    res.json(event);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 };
 
 exports.delete = async (req, res) => {
-  await Event.findByIdAndDelete(req.params.id);
-  res.json({ ok: true });
+  try {
+    const event = await Event.findOneAndDelete({
+      _id: req.params.id,
+      createdBy: req.user.id
+    });
+
+    if (!event) {
+      return res.status(404).json({ error: "Evento nao encontrado" });
+    }
+
+    res.json({ ok: true });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 };

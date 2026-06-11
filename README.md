@@ -22,9 +22,11 @@ cp .env.example .env
 npm run dev
 
 ## Endpoints
+GET /api-docs
 POST /register
 POST /login
 GET /events
+GET /events/:id
 POST /events
 PUT /events/:id
 DELETE /events/:id
@@ -74,6 +76,12 @@ http://localhost:3000/events
 
 //TOKEN NO AUTHORIZATION
 
+//BUSCAR EVENTO POR ID-GET
+
+http://localhost:3000/events/ID_DO_EVENTO
+
+//TOKEN NO AUTHORIZATION
+
 //EDITAR EVENTO-PUT
 
 http://localhost:3000/events/ID_DO_EVENTO
@@ -87,6 +95,10 @@ body:
 //DELETAR EVENTO-DELETE
 
 http://localhost:3000/events/ID_DO_EVENTO
+
+//DOCUMENTACAO SWAGGER
+
+http://localhost:3000/api-docs
 
 
 

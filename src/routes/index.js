@@ -1,16 +1,17 @@
 const router = require('express').Router();
 
 const auth = require('../controllers/authController');
-const event = require('../controllers/eventController');
-const authMiddleware = require('../middlewares/auth');
+
+router.use('/api', require('./apiRoutes'));
 
 router.post('/register', auth.register);
 router.post('/login', auth.login);
+router.post('/api/register', auth.register);
+router.post('/api/login', auth.login);
 
-router.get('/events', authMiddleware, event.getAll);
-router.get('/events/:id', authMiddleware, event.getById);
-router.post('/events', authMiddleware, event.create);
-router.put('/events/:id', authMiddleware, event.update);
-router.delete('/events/:id', authMiddleware, event.delete);
+router.use('/api/categorias', require('./categoriaRoutes'));
+router.use('/api/produtos', require('./produtosRoutes'));
+router.use('/api/clientes', require('./clientesRoutes'));
+router.use('/api/pedidos', require('./pedidosRoutes'));
 
 module.exports = router;

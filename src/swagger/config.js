@@ -1,537 +1,138 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 
+const privateSecurity = [{ bearerAuth: [], userIdHeader: [] }];
+
+const crudPaths = (tag, schema) => ({
+  get: {
+    tags: [tag],
+    security: privateSecurity,
+    responses: { 200: { description: 'Lista retornada com sucesso.' }, 401: { description: 'Nao autorizado.' }, 403: { description: 'Proibido.' } }
+  },
+  post: {
+    tags: [tag],
+    security: privateSecurity,
+    requestBody: { required: true, content: { 'application/json': { schema } } },
+    responses: { 201: { description: 'Registro criado com sucesso.' }, 401: { description: 'Nao autorizado.' }, 403: { description: 'Proibido.' } }
+  }
+});
+
+const crudByIdPaths = (tag, schema) => ({
+  get: {
+    tags: [tag],
+    security: privateSecurity,
+    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+    responses: { 200: { description: 'Registro encontrado.' }, 404: { description: 'Registro nao encontrado.' } }
+  },
+  put: {
+    tags: [tag],
+    security: privateSecurity,
+    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+    requestBody: { required: true, content: { 'application/json': { schema } } },
+    responses: { 200: { description: 'Registro atualizado.' }, 404: { description: 'Registro nao encontrado.' } }
+  },
+  delete: {
+    tags: [tag],
+    security: privateSecurity,
+    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
+    responses: { 200: { description: 'Registro removido.' }, 404: { description: 'Registro nao encontrado.' } }
+  }
+});
+
 const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'API REST - Eventos',
-      version: '1.0.0',
-      description: 'Documentacao da API REST de eventos com autenticacao JWT.',
+      title: 'API REST - Loja',
+      version: process.env.API_VERSION || '2.0.0',
+      description: 'API relacional com MySQL, JWT e CRUD protegido.'
     },
-    servers: [
-      {
-        url: `http://localhost:${process.env.PORT || 3000}`,
-        description: 'Servidor local',
-      },
-    ],
-    tags: [
-      {
-        name: 'Autenticacao',
-        description: 'Cadastro e login de usuarios',
-      },
-      {
-        name: 'Eventos',
-        description: 'CRUD principal de eventos',
-      },
-    ],
+    servers: [{ url: `http://localhost:${process.env.PORT || 3000}` }],
     components: {
       securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          description: 'Informe o token JWT gerado no login.',
-        },
+        bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+        userIdHeader: { type: 'apiKey', in: 'header', name: 'x-user-id' }
       },
       schemas: {
-        RegisterRequest: {
+        Login: {
           type: 'object',
-          required: ['name', 'email', 'password'],
+          required: ['nick', 'senha'],
           properties: {
-            name: {
-              type: 'string',
-              example: 'Felipe',
-            },
-            email: {
-              type: 'string',
-              format: 'email',
-              example: 'felipe@email.com',
-            },
-            password: {
-              type: 'string',
-              example: '123456',
-            },
-          },
+            nick: { type: 'string', example: 'admin' },
+            senha: { type: 'string', example: '123456' }
+          }
         },
-        LoginRequest: {
+        Categoria: {
           type: 'object',
-          required: ['email', 'password'],
+          required: ['nome'],
           properties: {
-            email: {
-              type: 'string',
-              format: 'email',
-              example: 'felipe@email.com',
-            },
-            password: {
-              type: 'string',
-              example: '123456',
-            },
-          },
+            nome: { type: 'string', example: 'Eletronicos' }
+          }
         },
-        LoginResponse: {
+        Produto: {
           type: 'object',
+          required: ['nome', 'valor', 'categoria_id'],
           properties: {
-            token: {
-              type: 'string',
-              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-            },
-          },
+            nome: { type: 'string', example: 'Mouse' },
+            valor: { type: 'number', example: 49.9 },
+            estoque: { type: 'integer', example: 10 },
+            categoria_id: { type: 'integer', example: 1 }
+          }
         },
-        User: {
+        Cliente: {
           type: 'object',
+          required: ['nome', 'telefone'],
           properties: {
-            _id: {
-              type: 'string',
-              example: '665f1e2b8c5a4b001f123456',
-            },
-            name: {
-              type: 'string',
-              example: 'Felipe',
-            },
-            email: {
-              type: 'string',
-              example: 'felipe@email.com',
-            },
-            password: {
-              type: 'string',
-              example: '$2b$10$hashDaSenha',
-            },
-          },
+            nome: { type: 'string', example: 'Maria' },
+            telefone: { type: 'string', example: '11999999999' },
+            status: { type: 'string', example: 'bom' }
+          }
         },
-        EventRequest: {
+        Pedido: {
           type: 'object',
-          required: ['title'],
+          required: ['cliente_id'],
           properties: {
-            title: {
-              type: 'string',
-              example: 'Apresentação do projeto',
-            },
-            description: {
-              type: 'string',
-              example: 'Demonstração da API com Swagger',
-            },
-            date: {
-              type: 'string',
-              format: 'date',
-              example: '2026-06-11',
-            },
-          },
-        },
-        Event: {
-          type: 'object',
-          properties: {
-            _id: {
-              type: 'string',
-              example: '665f1e2b8c5a4b001f654321',
-            },
-            title: {
-              type: 'string',
-              example: 'Apresentação do projeto',
-            },
-            description: {
-              type: 'string',
-              example: 'Demonstração da API com Swagger',
-            },
-            date: {
-              type: 'string',
-              format: 'date-time',
-              example: '2026-06-11T00:00:00.000Z',
-            },
-            createdBy: {
-              type: 'string',
-              example: '665f1e2b8c5a4b001f123456',
-            },
-          },
-        },
-        ErrorResponse: {
-          type: 'object',
-          properties: {
-            error: {
-              type: 'string',
-              example: 'Mensagem de erro',
-            },
-          },
-        },
-      },
+            cliente_id: { type: 'integer', example: 1 },
+            data: { type: 'string', example: '2026-07-02' },
+            itens: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  produto_id: { type: 'integer', example: 1 },
+                  quantidade: { type: 'integer', example: 2 },
+                  valor: { type: 'number', example: 49.9 }
+                }
+              }
+            }
+          }
+        }
+      }
     },
     paths: {
-      '/register': {
+      '/api/status': {
+        get: {
+          tags: ['Status'],
+          responses: { 200: { description: 'API online.' } }
+        }
+      },
+      '/api/login': {
         post: {
           tags: ['Autenticacao'],
-          summary: 'Cadastrar usuário',
-          description: 'Cria um novo usuario no sistema.',
-          requestBody: {
-            required: true,
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RegisterRequest',
-                },
-              },
-            },
-          },
-          responses: {
-            200: {
-              description: 'Usuario cadastrado com sucesso.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/User',
-                  },
-                },
-              },
-            },
-            400: {
-              description: 'Dados inválidos ou erro ao registrar.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-          },
-        },
+          requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/Login' } } } },
+          responses: { 200: { description: 'Login realizado.' }, 401: { description: 'Credenciais invalidas.' } }
+        }
       },
-      '/login': {
-        post: {
-          tags: ['Autenticacao'],
-          summary: 'Login de usuário',
-          description: 'Autentica o usuário e retorna um token JWT.',
-          requestBody: {
-            required: true,
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/LoginRequest',
-                },
-              },
-            },
-          },
-          responses: {
-            200: {
-              description: 'Login realizado com sucesso.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/LoginResponse',
-                  },
-                },
-              },
-            },
-            400: {
-              description: 'Usuario nao encontrado ou senha invalida.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-            500: {
-              description: 'Erro interno no login.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      '/events': {
-        get: {
-          tags: ['Eventos'],
-          summary: 'Listar eventos',
-          description: 'Lista todos os eventos do usuário autenticado.',
-          security: [{ bearerAuth: [] }],
-          responses: {
-            200: {
-              description: 'Lista de eventos retornada com sucesso.',
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'array',
-                    items: {
-                      $ref: '#/components/schemas/Event',
-                    },
-                  },
-                },
-              },
-            },
-            401: {
-              description: 'Token nao informado ou invalido.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-            400: {
-              description: 'Erro ao buscar eventos.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-          },
-        },
-        post: {
-          tags: ['Eventos'],
-          summary: 'Criar evento',
-          description: 'Cria um evento para o usuário autenticado.',
-          security: [{ bearerAuth: [] }],
-          requestBody: {
-            required: true,
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/EventRequest',
-                },
-              },
-            },
-          },
-          responses: {
-            200: {
-              description: 'Evento criado com sucesso.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/Event',
-                  },
-                },
-              },
-            },
-            400: {
-              description: 'Dados inválidos para criação do evento.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-            401: {
-              description: 'Token nao informado ou invalido.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      '/events/{id}': {
-        get: {
-          tags: ['Eventos'],
-          summary: 'Buscar evento por ID',
-          description: 'Retorna um evento específico do usuário autenticado.',
-          security: [{ bearerAuth: [] }],
-          parameters: [
-            {
-              name: 'id',
-              in: 'path',
-              required: true,
-              description: 'ID do evento.',
-              schema: {
-                type: 'string',
-              },
-            },
-          ],
-          responses: {
-            200: {
-              description: 'Evento encontrado com sucesso.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/Event',
-                  },
-                },
-              },
-            },
-            400: {
-              description: 'ID inválido.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-            401: {
-              description: 'Token nao informado ou invalido.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-            404: {
-              description: 'Evento nao encontrado.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-          },
-        },
-        put: {
-          tags: ['Eventos'],
-          summary: 'Atualizar evento',
-          description: 'Atualiza um evento existente do usuário autenticado.',
-          security: [{ bearerAuth: [] }],
-          parameters: [
-            {
-              name: 'id',
-              in: 'path',
-              required: true,
-              description: 'ID do evento.',
-              schema: {
-                type: 'string',
-              },
-            },
-          ],
-          requestBody: {
-            required: true,
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/EventRequest',
-                },
-              },
-            },
-          },
-          responses: {
-            200: {
-              description: 'Evento atualizado com sucesso.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/Event',
-                  },
-                },
-              },
-            },
-            400: {
-              description: 'ID ou dados inválidos.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-            401: {
-              description: 'Token nao informado ou invalido.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-            404: {
-              description: 'Evento nao encontrado.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-          },
-        },
-        delete: {
-          tags: ['Eventos'],
-          summary: 'Excluir evento',
-          description: 'Remove um evento existente do usuário autenticado.',
-          security: [{ bearerAuth: [] }],
-          parameters: [
-            {
-              name: 'id',
-              in: 'path',
-              required: true,
-              description: 'ID do evento.',
-              schema: {
-                type: 'string',
-              },
-            },
-          ],
-          responses: {
-            200: {
-              description: 'Evento excluído com sucesso.',
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'object',
-                    properties: {
-                      ok: {
-                        type: 'boolean',
-                        example: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            400: {
-              description: 'ID inválido.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-            401: {
-              description: 'Token nao informado ou invalido.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-            404: {
-              description: 'Evento nao encontrado.',
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/ErrorResponse',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+      '/api/categorias': crudPaths('Categorias', { $ref: '#/components/schemas/Categoria' }),
+      '/api/categorias/{id}': crudByIdPaths('Categorias', { $ref: '#/components/schemas/Categoria' }),
+      '/api/produtos': crudPaths('Produtos', { $ref: '#/components/schemas/Produto' }),
+      '/api/produtos/{id}': crudByIdPaths('Produtos', { $ref: '#/components/schemas/Produto' }),
+      '/api/clientes': crudPaths('Clientes', { $ref: '#/components/schemas/Cliente' }),
+      '/api/clientes/{id}': crudByIdPaths('Clientes', { $ref: '#/components/schemas/Cliente' }),
+      '/api/pedidos': crudPaths('Pedidos', { $ref: '#/components/schemas/Pedido' }),
+      '/api/pedidos/{id}': crudByIdPaths('Pedidos', { $ref: '#/components/schemas/Pedido' })
+    }
   },
-  apis: [],
+  apis: []
 };
 
 module.exports = swaggerJsdoc(options);

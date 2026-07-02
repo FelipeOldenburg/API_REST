@@ -1,109 +1,98 @@
-# API_REST
+# API REST Loja
 
-# API de Eventos 🎉
+API REST em Node.js/Express usando MySQL, JWT e prepared statements.
 
-API REST desenvolvida com Node.js e MongoDB para gerenciamento de eventos com autenticação de usuários.
-
-##  Tecnologias utilizadas
-
-- Node.js
-- Express
-- MongoDB
-- Mongoose
-- JWT (JSON Web Token)
-- Bcrypt
-
----
-
-##  Como rodar o projeto
-
-npm install
-cp .env.example .env
-npm run dev
-
-## Endpoints
-GET /api-docs
-POST /register
-POST /login
-GET /events
-GET /events/:id
-POST /events
-PUT /events/:id
-DELETE /events/:id
-
-exemplo:
-
-//CRIAR USUARIO-POST
-
-http://localhost:3000/register
-
-body:
-{
-  "name": "KaliLinux",
-  "email": "kali@gmail.com",
-  "password": "123456"
-}
-
-//FAZER LOGIN-POST
-
-http://localhost:3000/login
-
-body:
-{
-  "email": "kali@gmail.com",
-  "password": "123456"
-}
-
-Gera um token
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMDY4NjI4YTMzMWQxYjY0ZjEyM2ViMSIsImlhdCI6MTc3ODgxMjQ3OCwiZXhwIjoxNzc4ODk4ODc4fQ.X1twxpgBQ-c4jbjlgSDpcyuRSWlgM_mRL1teGit09Tg"
-}
-
-//CRIAR EVENTO-POST
-
-http://localhost:3000/events COLOCAR O TOKEN CRIADO EM AUTHORIZATION
-
-body:
-{
-  "title": "Hackear quem esta lendo",
-  "description": "Evento de teste",
-  "date": "2026-05-20"
-}
-
-//LISTAR EVENTOS-GET
-
-http://localhost:3000/events
-
-//TOKEN NO AUTHORIZATION
-
-//BUSCAR EVENTO POR ID-GET
-
-http://localhost:3000/events/ID_DO_EVENTO
-
-//TOKEN NO AUTHORIZATION
-
-//EDITAR EVENTO-PUT
-
-http://localhost:3000/events/ID_DO_EVENTO
-
-body:
-{
-  "title": "Pessoa hackeada com sucesso",
-  "description": "Descrição nova"
-}
-
-//DELETAR EVENTO-DELETE
-
-http://localhost:3000/events/ID_DO_EVENTO
-
-//DOCUMENTACAO SWAGGER
-
-http://localhost:3000/api-docs
-
-
-
-### 1. Clonar o repositório
+## Rodar
 
 ```bash
-git clone https://github.com/FelipeOldenburg/API_REST.git
-cd api-evento
+npm install
+mysql -u root -p < loja.sql
+cp .env.example .env
+npm run dev
+```
+
+Se o seu MySQL nao usa senha, remova o `-p` no comando acima. Ajuste `DB_USER` e `DB_PASSWORD` no `.env` conforme sua maquina.
+
+## Rotas publicas
+
+- `GET /api/status`
+- `GET /api/versao`
+- `POST /login`
+- `POST /api/login`
+- `POST /register`
+- `POST /api/register`
+- `GET /api-docs`
+
+Crie um usuario para testar:
+
+```json
+{
+  "nome": "Admin",
+  "nick": "admin",
+  "senha": "123456"
+}
+```
+
+Depois faca login com `nick` e `senha`.
+
+## Rotas privadas
+
+Enviar sempre:
+
+- `Authorization: Bearer <token>`
+- `x-user-id: <id retornado no login>`
+
+CRUDs:
+
+- `/api/categorias`
+- `/api/produtos`
+- `/api/clientes`
+- `/api/pedidos`
+
+Exemplo para bloquear invasao:
+
+```bash
+curl http://localhost:3000/api/categorias
+```
+
+Resposta esperada: `401` sem token ou `403` sem `x-user-id`.
+
+Exemplo de categoria:
+
+```json
+{
+  "nome": "Eletronicos"
+}
+```
+
+Exemplo de produto:
+
+```json
+{
+  "nome": "Mouse USB",
+  "valor": 49.9,
+  "estoque": 10,
+  "categoria_id": 5
+}
+```
+
+Exemplo de cliente:
+
+```json
+{
+  "nome": "Maria",
+  "telefone": "51999999999",
+  "status": "bom"
+}
+```
+
+Exemplo de pedido:
+
+```json
+{
+  "cliente_id": 1,
+  "itens": [
+    { "produto_id": 1, "quantidade": 1 }
+  ]
+}
+```

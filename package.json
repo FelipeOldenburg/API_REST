@@ -1,9 +1,10 @@
 {
   "name": "api_rest",
   "version": "1.0.0",
-  "description": "",
+  "description": "HelpDesk desacoplado com API REST e frontend consumidor",
   "main": "index.js",
   "scripts": {
+    "start": "node server.js",
     "test": "node scripts/smoke.js",
     "dev": "nodemon server.js"
   },
@@ -11,6 +12,9 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",

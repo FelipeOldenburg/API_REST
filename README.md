@@ -1,98 +1,64 @@
-# API REST Loja
+# HelpDesk API REST
 
-API REST em Node.js/Express usando MySQL, JWT e prepared statements.
+Backend JSON do sistema HelpDesk, desacoplado do frontend consumidor.
 
-## Rodar
+## Funcionalidades
+
+- cadastro/login com `bcryptjs` e JWT Bearer;
+- cliente abre e lista somente seus chamados;
+- tecnico lista todos, altera status e comenta;
+- status `Aberto`, `Em Atendimento` e `Concluído`;
+- SQL parametrizado com `mysql2.execute()`;
+- Swagger UI em `/api-docs`;
+- CORS limitado a `FRONTEND_ORIGIN` em producao.
+
+## Instalacao e execucao
 
 ```bash
 npm install
-mysql -u root -p < loja.sql
-cp .env.example .env
+mysql -u root -p < helpdesk.sql
+copy .env.example .env
 npm run dev
 ```
 
-Se o seu MySQL nao usa senha, remova o `-p` no comando acima. Ajuste `DB_USER` e `DB_PASSWORD` no `.env` conforme sua maquina.
+API: `http://localhost:3000`
 
-## Rotas publicas
+Swagger: `http://localhost:3000/api-docs`
 
-- `GET /api/status`
-- `GET /api/versao`
-- `POST /login`
-- `POST /api/login`
-- `POST /register`
-- `POST /api/register`
-- `GET /api-docs`
+Execute `npm test` para validar status, Swagger, CORS, rota protegida e autorizacao por papel.
 
-Crie um usuario para testar:
+## Variaveis de ambiente
 
-```json
-{
-  "nome": "Admin",
-  "nick": "admin",
-  "senha": "123456"
-}
-```
+| Variavel | Uso |
+| --- | --- |
+| `PORT` | Porta da API. |
+| `DB_HOST`, `DB_PORT` | Endereco do MySQL. |
+| `DB_USER`, `DB_PASSWORD`, `DB_NAME` | Credenciais e banco. |
+| `DB_SSL`, `DB_SSL_REJECT_UNAUTHORIZED` | TLS do banco gerenciado. |
+| `JWT_SECRET` | Chave longa e aleatoria para assinar tokens. |
+| `FRONTEND_ORIGIN` | URL publica exata do frontend aceita pelo CORS. |
+| `API_BASE_URL` | URL publica da API exibida pelo Swagger. |
+| `API_VERSION` | Versao retornada pelo endpoint de status. |
 
-Depois faca login com `nick` e `senha`.
+O `.env` local e ignorado e nao deve ser commitado.
 
-## Rotas privadas
+## API
 
-Enviar sempre:
+- `POST /api/register` e `POST /api/login`: publicas.
+- `GET /api/chamados` e `GET /api/chamados/:id`: autenticadas.
+- `POST /api/chamados`: somente cliente.
+- `PATCH /api/chamados/:id/status`: somente tecnico.
+- `POST /api/chamados/:id/comentarios`: somente tecnico.
 
-- `Authorization: Bearer <token>`
-- `x-user-id: <id retornado no login>`
+Envie `Authorization: Bearer <token>` nas rotas privadas. Os schemas e exemplos ficam no Swagger.
 
-CRUDs:
+## Deploy
 
-- `/api/categorias`
-- `/api/produtos`
-- `/api/clientes`
-- `/api/pedidos`
+1. Importe `helpdesk.sql` em um MySQL gerenciado e habilite TLS quando exigido.
+2. Crie a API no Render pelo `render.yaml` e configure todas as variaveis sem usar `localhost`.
+3. Publique o repositorio `helpdesk-web` separadamente na Vercel.
+4. Configure `FRONTEND_ORIGIN` na API com a URL final da Vercel e `API_BASE_URL` com a URL final do Render.
 
-Exemplo para bloquear invasao:
+Repositorio: https://github.com/FelipeOldenburg/API_REST.git
 
-```bash
-curl http://localhost:3000/api/categorias
-```
-
-Resposta esperada: `401` sem token ou `403` sem `x-user-id`.
-
-Exemplo de categoria:
-
-```json
-{
-  "nome": "Eletronicos"
-}
-```
-
-Exemplo de produto:
-
-```json
-{
-  "nome": "Mouse USB",
-  "valor": 49.9,
-  "estoque": 10,
-  "categoria_id": 5
-}
-```
-
-Exemplo de cliente:
-
-```json
-{
-  "nome": "Maria",
-  "telefone": "51999999999",
-  "status": "bom"
-}
-```
-
-Exemplo de pedido:
-
-```json
-{
-  "cliente_id": 1,
-  "itens": [
-    { "produto_id": 1, "quantidade": 1 }
-  ]
-}
-```
+URLs de producao: registre aqui apos criar os servicos no Render e na Vercel.

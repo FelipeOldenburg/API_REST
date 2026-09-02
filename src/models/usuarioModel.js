@@ -1,27 +1,16 @@
 const db = require('../config/database');
 
-const findById = async (id) => {
-  const [rows] = await db.execute(
-    'SELECT id_usuario AS id, nome, nick FROM usuarios WHERE id_usuario = ? LIMIT 1',
-    [id]
-  );
+const findByEmail = async (email) => {
+  const [rows] = await db.execute('SELECT id, nome, email, senha_hash, papel FROM usuarios WHERE email = ? LIMIT 1', [email]);
   return rows[0];
 };
 
-const findByLogin = async (login) => {
-  const [rows] = await db.execute(
-    'SELECT id_usuario AS id, nome, nick, senha FROM usuarios WHERE nick = ? LIMIT 1',
-    [login]
-  );
-  return rows[0];
-};
-
-const create = async ({ nome, nick, senha }) => {
+const create = async ({ nome, email, senhaHash, papel }) => {
   const [result] = await db.execute(
-    'INSERT INTO usuarios (nome, nick, senha) VALUES (?, ?, ?)',
-    [nome, nick, senha]
+    'INSERT INTO usuarios (nome, email, senha_hash, papel) VALUES (?, ?, ?, ?)',
+    [nome, email, senhaHash, papel]
   );
-  return findById(result.insertId);
+  return { id: result.insertId, nome, email, papel };
 };
 
-module.exports = { findById, findByLogin, create };
+module.exports = { findByEmail, create };

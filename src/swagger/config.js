@@ -1,138 +1,35 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 
-const privateSecurity = [{ bearerAuth: [], userIdHeader: [] }];
+const bearer = [{ bearerAuth: [] }];
+const jsonBody = (schema) => ({ required: true, content: { 'application/json': { schema } } });
+const id = { name: 'id', in: 'path', required: true, schema: { type: 'integer' } };
 
-const crudPaths = (tag, schema) => ({
-  get: {
-    tags: [tag],
-    security: privateSecurity,
-    responses: { 200: { description: 'Lista retornada com sucesso.' }, 401: { description: 'Nao autorizado.' }, 403: { description: 'Proibido.' } }
-  },
-  post: {
-    tags: [tag],
-    security: privateSecurity,
-    requestBody: { required: true, content: { 'application/json': { schema } } },
-    responses: { 201: { description: 'Registro criado com sucesso.' }, 401: { description: 'Nao autorizado.' }, 403: { description: 'Proibido.' } }
-  }
-});
-
-const crudByIdPaths = (tag, schema) => ({
-  get: {
-    tags: [tag],
-    security: privateSecurity,
-    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
-    responses: { 200: { description: 'Registro encontrado.' }, 404: { description: 'Registro nao encontrado.' } }
-  },
-  put: {
-    tags: [tag],
-    security: privateSecurity,
-    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
-    requestBody: { required: true, content: { 'application/json': { schema } } },
-    responses: { 200: { description: 'Registro atualizado.' }, 404: { description: 'Registro nao encontrado.' } }
-  },
-  delete: {
-    tags: [tag],
-    security: privateSecurity,
-    parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
-    responses: { 200: { description: 'Registro removido.' }, 404: { description: 'Registro nao encontrado.' } }
-  }
-});
-
-const options = {
+module.exports = swaggerJsdoc({
   definition: {
     openapi: '3.0.0',
-    info: {
-      title: 'API REST - Loja',
-      version: process.env.API_VERSION || '2.0.0',
-      description: 'API relacional com MySQL, JWT e CRUD protegido.'
-    },
-    servers: [{ url: `http://localhost:${process.env.PORT || 3000}` }],
+    info: { title: 'HelpDesk API', version: process.env.API_VERSION || '1.0.0', description: 'API REST para abertura e atendimento de chamados.' },
+    servers: [{ url: process.env.API_BASE_URL || '/' }],
     components: {
-      securitySchemes: {
-        bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-        userIdHeader: { type: 'apiKey', in: 'header', name: 'x-user-id' }
-      },
+      securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } },
       schemas: {
-        Login: {
-          type: 'object',
-          required: ['nick', 'senha'],
-          properties: {
-            nick: { type: 'string', example: 'admin' },
-            senha: { type: 'string', example: '123456' }
-          }
-        },
-        Categoria: {
-          type: 'object',
-          required: ['nome'],
-          properties: {
-            nome: { type: 'string', example: 'Eletronicos' }
-          }
-        },
-        Produto: {
-          type: 'object',
-          required: ['nome', 'valor', 'categoria_id'],
-          properties: {
-            nome: { type: 'string', example: 'Mouse' },
-            valor: { type: 'number', example: 49.9 },
-            estoque: { type: 'integer', example: 10 },
-            categoria_id: { type: 'integer', example: 1 }
-          }
-        },
-        Cliente: {
-          type: 'object',
-          required: ['nome', 'telefone'],
-          properties: {
-            nome: { type: 'string', example: 'Maria' },
-            telefone: { type: 'string', example: '11999999999' },
-            status: { type: 'string', example: 'bom' }
-          }
-        },
-        Pedido: {
-          type: 'object',
-          required: ['cliente_id'],
-          properties: {
-            cliente_id: { type: 'integer', example: 1 },
-            data: { type: 'string', example: '2026-07-02' },
-            itens: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  produto_id: { type: 'integer', example: 1 },
-                  quantidade: { type: 'integer', example: 2 },
-                  valor: { type: 'number', example: 49.9 }
-                }
-              }
-            }
-          }
-        }
+        Usuario: { type: 'object', required: ['nome', 'email', 'senha', 'papel'], properties: { nome: { type: 'string' }, email: { type: 'string', format: 'email' }, senha: { type: 'string', minLength: 6 }, papel: { type: 'string', enum: ['cliente', 'tecnico'] } } },
+        Login: { type: 'object', required: ['email', 'senha'], properties: { email: { type: 'string', format: 'email' }, senha: { type: 'string' } } },
+        Chamado: { type: 'object', required: ['titulo', 'descricao'], properties: { titulo: { type: 'string' }, descricao: { type: 'string' }, status: { type: 'string', enum: ['Aberto', 'Em Atendimento', 'Concluído'] } } },
+        Comentario: { type: 'object', required: ['mensagem'], properties: { mensagem: { type: 'string' } } }
       }
     },
     paths: {
-      '/api/status': {
-        get: {
-          tags: ['Status'],
-          responses: { 200: { description: 'API online.' } }
-        }
+      '/api/status': { get: { tags: ['Status'], responses: { 200: { description: 'API online.' } } } },
+      '/api/register': { post: { tags: ['Autenticacao'], requestBody: jsonBody({ $ref: '#/components/schemas/Usuario' }), responses: { 201: { description: 'Usuario criado.' }, 400: { description: 'Dados invalidos.' } } } },
+      '/api/login': { post: { tags: ['Autenticacao'], requestBody: jsonBody({ $ref: '#/components/schemas/Login' }), responses: { 200: { description: 'Token e usuario.' }, 401: { description: 'Credenciais invalidas.' } } } },
+      '/api/chamados': {
+        get: { tags: ['Chamados'], security: bearer, responses: { 200: { description: 'Lista filtrada pelo papel.' }, 401: { description: 'Nao autenticado.' } } },
+        post: { tags: ['Chamados'], security: bearer, requestBody: jsonBody({ $ref: '#/components/schemas/Chamado' }), responses: { 201: { description: 'Chamado aberto pelo cliente.' }, 403: { description: 'Apenas clientes.' } } }
       },
-      '/api/login': {
-        post: {
-          tags: ['Autenticacao'],
-          requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/Login' } } } },
-          responses: { 200: { description: 'Login realizado.' }, 401: { description: 'Credenciais invalidas.' } }
-        }
-      },
-      '/api/categorias': crudPaths('Categorias', { $ref: '#/components/schemas/Categoria' }),
-      '/api/categorias/{id}': crudByIdPaths('Categorias', { $ref: '#/components/schemas/Categoria' }),
-      '/api/produtos': crudPaths('Produtos', { $ref: '#/components/schemas/Produto' }),
-      '/api/produtos/{id}': crudByIdPaths('Produtos', { $ref: '#/components/schemas/Produto' }),
-      '/api/clientes': crudPaths('Clientes', { $ref: '#/components/schemas/Cliente' }),
-      '/api/clientes/{id}': crudByIdPaths('Clientes', { $ref: '#/components/schemas/Cliente' }),
-      '/api/pedidos': crudPaths('Pedidos', { $ref: '#/components/schemas/Pedido' }),
-      '/api/pedidos/{id}': crudByIdPaths('Pedidos', { $ref: '#/components/schemas/Pedido' })
+      '/api/chamados/{id}': { get: { tags: ['Chamados'], security: bearer, parameters: [id], responses: { 200: { description: 'Chamado com comentarios.' }, 404: { description: 'Nao encontrado.' } } } },
+      '/api/chamados/{id}/status': { patch: { tags: ['Atendimento'], security: bearer, parameters: [id], requestBody: jsonBody({ type: 'object', required: ['status'], properties: { status: { type: 'string', enum: ['Aberto', 'Em Atendimento', 'Concluído'] } } }), responses: { 200: { description: 'Status atualizado.' }, 403: { description: 'Apenas tecnicos.' } } } },
+      '/api/chamados/{id}/comentarios': { post: { tags: ['Atendimento'], security: bearer, parameters: [id], requestBody: jsonBody({ $ref: '#/components/schemas/Comentario' }), responses: { 201: { description: 'Comentario adicionado.' }, 403: { description: 'Apenas tecnicos.' } } } }
     }
   },
   apis: []
-};
-
-module.exports = swaggerJsdoc(options);
+});

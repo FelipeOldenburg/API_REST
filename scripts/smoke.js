@@ -11,6 +11,7 @@ const vercel = require('../vercel.json');
 
 const ticket = { id: 1, titulo: 'Acesso indisponivel', descricao: 'Nao consigo acessar', status: 'Aberto', cliente: 'Cliente', total_comentarios: 0, comentarios: [] };
 Usuario.findByEmail = async () => ({ id: 2, nome: 'Cliente', email: 'cliente@example.com', papel: 'cliente', senha_hash: bcrypt.hashSync('123456', 4) });
+Usuario.create = async ({ nome, email, papel }) => ({ id: 3, nome, email, papel });
 Chamado.list = async () => [ticket];
 Chamado.findById = async () => ticket;
 Chamado.create = async () => ticket;
@@ -38,6 +39,7 @@ const request = (port, path, options = {}) => new Promise((resolve, reject) => {
       request(port, '/api/status'), request(port, '/api/chamados'), request(port, '/'), request(port, '/api-docs/'), request(port, '/api-docs/swagger.json'), request(port, '/api-docs/swagger-ui.css'), request(port, '/api-docs/swagger-ui-bundle.js'), request(port, '/api-docs/swagger-ui-init.js'),
       request(port, '/api/chamados', { method: 'OPTIONS', headers: { Origin: 'http://localhost:5173', 'Access-Control-Request-Method': 'GET' } })
     ]);
+    const registration = await request(port, '/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: 'Novo usuario', email: 'novo@example.com', senha: '123456', papel: 'cliente' }) });
     const login = await request(port, '/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'cliente@example.com', senha: '123456' }) });
     const cliente = JSON.parse(login.body).token;
     const list = await request(port, '/api/chamados', { headers: { Authorization: `Bearer ${cliente}` } });
@@ -57,6 +59,8 @@ const request = (port, path, options = {}) => new Promise((resolve, reject) => {
     assert.equal(vercel.functions['api/index.js'].includeFiles, 'node_modules/swagger-ui-dist/**');
     assert.equal('builds' in vercel, false);
     assert.equal(preflight.headers['access-control-allow-origin'], 'http://localhost:5173');
+    assert.equal(registration.status, 201);
+    assert.equal(JSON.parse(registration.body).email, 'novo@example.com');
     assert.equal(login.status, 200);
     assert.equal(list.status, 200);
     assert.equal(created.status, 201);

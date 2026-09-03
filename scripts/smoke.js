@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Usuario = require('../src/models/usuarioModel');
 const Chamado = require('../src/models/chamadoModel');
+const vercel = require('../vercel.json');
 
 const ticket = { id: 1, titulo: 'Acesso indisponivel', descricao: 'Nao consigo acessar', status: 'Aberto', cliente: 'Cliente', total_comentarios: 0, comentarios: [] };
 Usuario.findByEmail = async () => ({ id: 2, nome: 'Cliente', email: 'cliente@example.com', papel: 'cliente', senha_hash: bcrypt.hashSync('123456', 4) });
@@ -33,8 +34,8 @@ const request = (port, path, options = {}) => new Promise((resolve, reject) => {
   await new Promise((resolve) => server.once('listening', resolve));
   try {
     const port = server.address().port;
-    const [status, blocked, home, swagger, preflight] = await Promise.all([
-      request(port, '/api/status'), request(port, '/api/chamados'), request(port, '/'), request(port, '/api-docs/'),
+    const [status, blocked, home, swagger, swaggerSpec, swaggerCss, swaggerBundle, swaggerInit, preflight] = await Promise.all([
+      request(port, '/api/status'), request(port, '/api/chamados'), request(port, '/'), request(port, '/api-docs/'), request(port, '/api-docs/swagger.json'), request(port, '/api-docs/swagger-ui.css'), request(port, '/api-docs/swagger-ui-bundle.js'), request(port, '/api-docs/swagger-ui-init.js'),
       request(port, '/api/chamados', { method: 'OPTIONS', headers: { Origin: 'http://localhost:5173', 'Access-Control-Request-Method': 'GET' } })
     ]);
     const login = await request(port, '/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'cliente@example.com', senha: '123456' }) });
@@ -49,6 +50,12 @@ const request = (port, path, options = {}) => new Promise((resolve, reject) => {
     assert.equal(blocked.status, 401);
     assert.match(home.body, /HelpDesk API/);
     assert.equal(swagger.status, 200);
+    assert.equal(JSON.parse(swaggerSpec.body).openapi, '3.0.0');
+    assert.equal(swaggerCss.status, 200);
+    assert.equal(swaggerBundle.status, 200);
+    assert.match(swaggerInit.body, /api-docs\/swagger\.json/);
+    assert.equal(vercel.functions['api/index.js'].includeFiles, 'node_modules/swagger-ui-dist/**');
+    assert.equal('builds' in vercel, false);
     assert.equal(preflight.headers['access-control-allow-origin'], 'http://localhost:5173');
     assert.equal(login.status, 200);
     assert.equal(list.status, 200);

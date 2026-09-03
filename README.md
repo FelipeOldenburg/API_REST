@@ -37,7 +37,6 @@ Execute `npm test` para validar status, Swagger, CORS, rota protegida e autoriza
 | `DB_SSL`, `DB_SSL_REJECT_UNAUTHORIZED` | TLS do banco gerenciado. |
 | `JWT_SECRET` | Chave longa e aleatoria para assinar tokens. |
 | `FRONTEND_ORIGIN` | URL publica exata do frontend aceita pelo CORS. |
-| `API_BASE_URL` | URL publica da API exibida pelo Swagger. |
 | `API_VERSION` | Versao retornada pelo endpoint de status. |
 
 O `.env` local e ignorado e nao deve ser commitado.
@@ -57,7 +56,7 @@ Envie `Authorization: Bearer <token>` nas rotas privadas. Os schemas e exemplos 
 1. Importe `helpdesk.sql` em um MySQL gerenciado e habilite TLS quando exigido.
 2. Crie a API no Render pelo `render.yaml` e configure todas as variaveis sem usar `localhost`.
 3. Publique o repositorio `helpdesk-web` separadamente na Vercel.
-4. Configure `FRONTEND_ORIGIN` na API com a URL final da Vercel e `API_BASE_URL` com a URL final do Render.
+4. Configure `FRONTEND_ORIGIN` na API com a URL final da Vercel.
 
 Repositorio: https://github.com/FelipeOldenburg/API_REST.git
 

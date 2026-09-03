@@ -8,7 +8,7 @@ module.exports = swaggerJsdoc({
   definition: {
     openapi: '3.0.0',
     info: { title: 'HelpDesk API', version: process.env.API_VERSION || '1.0.0', description: 'API REST para abertura e atendimento de chamados.' },
-    servers: [{ url: process.env.API_BASE_URL || '/' }],
+    servers: [{ url: '/' }],
     components: {
       securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } },
       schemas: {

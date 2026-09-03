@@ -5,6 +5,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger/config');
 
 const app = express();
+const swaggerOptions = { swaggerOptions: { url: '/api-docs/swagger.json' } };
 
 const allowedOrigins = (process.env.FRONTEND_ORIGIN || '')
   .split(',')
@@ -35,7 +36,8 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/api-docs/swagger.json', (req, res) => res.json(swaggerSpec));
+app.use('/api-docs', swaggerUi.serveFiles(null, swaggerOptions), swaggerUi.setup(null, swaggerOptions));
 app.use(require('./routes'));
 
 app.use(express.static(path.join(__dirname, '../public')));

@@ -11,6 +11,7 @@ Backend JSON do sistema HelpDesk, desacoplado do frontend consumidor.
 - SQL parametrizado com `mysql2.execute()`;
 - Swagger UI em `/api-docs`;
 - CORS limitado a `FRONTEND_ORIGIN` em producao.
+- tabelas `helpdesk_*` isoladas das tabelas legadas do banco Loja/MVC.
 
 ## Instalacao e execucao
 
@@ -53,7 +54,7 @@ Envie `Authorization: Bearer <token>` nas rotas privadas. Os schemas e exemplos 
 
 ## Deploy
 
-1. Importe `helpdesk.sql` em um MySQL gerenciado e habilite TLS quando exigido.
+1. Importe `helpdesk.sql` em um MySQL gerenciado e habilite TLS quando exigido. A API tambem cria as tabelas `helpdesk_*` no primeiro acesso, preservando tabelas legadas como `usuarios`.
 2. Crie a API no Render pelo `render.yaml` e configure todas as variaveis sem usar `localhost`.
 3. Publique o repositorio `helpdesk-web` separadamente na Vercel.
 4. Configure `FRONTEND_ORIGIN` na API com a URL final da Vercel.
